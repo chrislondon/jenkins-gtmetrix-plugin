@@ -1,2 +1,2 @@
-jenkins-website-monitoring-plugin
+jenkins-gtmetrix-plugin
 =================================

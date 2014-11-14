@@ -1,0 +1,12 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+  <f:section title="GT Metrix Credentials">
+    <f:entry title="Email Address" field="email"
+        description="Your personal email from GT Metrix">
+        <f:textbox />
+      </f:entry>
+    <f:entry title="API Key" field="apiKey"
+          description="Your personal API key from GT Metrix">
+          <f:textbox />
+        </f:entry>
+  </f:section>
+</j:jelly>
