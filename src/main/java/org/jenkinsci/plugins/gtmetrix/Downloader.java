@@ -6,8 +6,10 @@ import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.remoting.Base64;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.HashMap;
@@ -33,8 +35,8 @@ public class Downloader {
         this.subDir = subDir;
     }
 
-    public void archive(HashMap files) {
-
+    public void archive(HashMap files) throws InterruptedException, IOException {
+        build.getArtifactManager().archive(build.getWorkspace(), launcher, listener, files);
     }
 
     public void download(HashMap files, FilePath target) throws InterruptedException, IOException {
@@ -57,8 +59,22 @@ public class Downloader {
                 connection.setRequestProperty("Authorization", "Basic " + Base64.encode(basicAuth.getBytes()));
             }
 
-            InputStream in = connection.getInputStream();
-            target.copyFrom(in);
+            byte[] buffer = new byte[8 * 1024];
+
+            InputStream input = connection.getInputStream();
+            try {
+                OutputStream output = new FileOutputStream(target.toURI().getPath() + (String)pairs.getValue());
+                try {
+                    int bytesRead;
+                    while ((bytesRead = input.read(buffer)) != -1) {
+                        output.write(buffer, 0, bytesRead);
+                    }
+                } finally {
+                    output.close();
+                }
+            } finally {
+                input.close();
+            }
 
             it.remove(); // avoids a ConcurrentModificationException
         }

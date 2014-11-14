@@ -5,6 +5,7 @@ import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.model.Action;
 import hudson.model.BuildListener;
 import hudson.remoting.Base64;
 import hudson.tasks.BuildStepDescriptor;
@@ -61,6 +62,7 @@ public class GtMetrixBuilder extends Builder {
     public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) {
         // This is where you 'build' the project.
 
+        // SET UP REQUESTER CLASS FOR MAKING ALL API CALLS
         ApiRequester requester = new ApiRequester(
             "https://gtmetrix.com/api/0.1",
             getDescriptor().getEmail(),
@@ -68,20 +70,22 @@ public class GtMetrixBuilder extends Builder {
         );
 
         try {
+            // MAKE API CALL TO GENERATE REPORT
             HashMap params = new HashMap();
             params.put("url", url);
 
             JSONObject response = requester.post("test", params);
 
             if (requester.getLastStatusCode() != 200) {
-                listener.getLogger().println("Error reported from GT Metrix: " + response.getString("error"));
+                listener.getLogger().println("Error generating report: " + response.getString("error"));
                 return false;
             }
 
+            // POLL THE API FOR THE REPORT TO BE DONE
             String pollStateUrl = response.getString("poll_state_url");
 
             int counter = 0;
-            int maxCounts = 60;
+            int maxCounts = 60; // ONLY POLL 60 TIMES
 
             do {
                 counter++;
@@ -89,21 +93,25 @@ public class GtMetrixBuilder extends Builder {
                     throw new Exception("Timeout: Hit Gt Metrix max counts");
                 }
 
-                Thread.sleep(5000);
+                Thread.sleep(5000); // WAIT 5 SECONDS BETWEEN EACH POLL
 
+                // MAKE API CALL TO POLL
                 response = requester.get(pollStateUrl);
 
                 if (requester.getLastStatusCode() != 200) {
-                    listener.getLogger().println("Error reported from GT Metrix: " + response.getString("error"));
+                    listener.getLogger().println("Error polling report (pollStateUrl): " + response.getString("error"));
                     return false;
                 }
+            // IF THE REPORT IS STILL "QUEUED" OR "STARTED" POLL AGAIN
             } while (response.getString("state").equals("queued") || response.getString("state").equals("started"));
 
+            // REPORT FAILED
             if (response.getString("state").equals("error")) {
-                listener.getLogger().println("Error reported from GT Metrix: " + response.getString("error"));
+                listener.getLogger().println("Report failed: " + response.getString("error"));
                 return false;
             }
 
+            // SET UP DOWNLOADER FOR DOWNLOADING ALL FILES
             Downloader downloader = new Downloader(build, launcher, listener, "gtmetrix");
             downloader.setAuth(
                 getDescriptor().getEmail(),
@@ -112,20 +120,27 @@ public class GtMetrixBuilder extends Builder {
 
             HashMap filesToDownload = new HashMap();
 
+            // FILES WE WANT IN OUR WORKSPACE AND OUR ARCHIVE
+            // These are files that the user can view from the jenkins web app
             filesToDownload.put(response.getJSONObject("resources").getString("report_pdf"), "report.pdf");
             filesToDownload.put(response.getJSONObject("resources").getString("report_pdf_full"), "full_report.pdf");
             filesToDownload.put(response.getJSONObject("resources").getString("screenshot"), "screenshot.png");
 
+            listener.getLogger().println("Downloading workspace files");
             downloader.download(filesToDownload, build.getWorkspace());
+            listener.getLogger().println("Archiving workspace files");
             downloader.archive(filesToDownload);
 
             filesToDownload = new HashMap();
 
+            // FILES WE WANT IN OUR BUILD DIR
+            filesToDownload.put(pollStateUrl, "report.json");
             filesToDownload.put(response.getJSONObject("resources").getString("pagespeed"), "pagespeed.json");
             filesToDownload.put(response.getJSONObject("resources").getString("har"), "har.json");
             filesToDownload.put(response.getJSONObject("resources").getString("pagespeed_files"), "pagespeed_files.json");
             filesToDownload.put(response.getJSONObject("resources").getString("yslow"), "yslow.json");
 
+            listener.getLogger().println("Downloading build files");
             downloader.download(filesToDownload, new FilePath(build.getRootDir()));
 
         } catch (Exception e) {
@@ -133,10 +148,23 @@ public class GtMetrixBuilder extends Builder {
             return false;
         }
 
+        // ADD OUR CUSTOM BUILD ACTION (SIDEBAR LINK ON BUILD PAGE)
         build.getActions().add(new GtMetrixBuildAction(build));
-        build.getProject().getActions().add(new GtMetrixProjectAction(build.getProject()));
+
+        // ADD OUR CUSTOM PROJECT ACTION (SUMMARY "FLOATING BOX" ON PROJECT PAGE)
+        //build.getProject().getActions().add(new GtMetrixProjectAction(build.getProject()));
 
         return true;
+    }
+
+    /**
+     * Create a project action for a project.
+     * @param project the project to create the action for.
+     * @return the created violations project action.
+     */
+    @Override
+    public Action getProjectAction(AbstractProject<?, ?> project) {
+        return new GtMetrixProjectAction(project);
     }
 
     // Overridden for better type safety.

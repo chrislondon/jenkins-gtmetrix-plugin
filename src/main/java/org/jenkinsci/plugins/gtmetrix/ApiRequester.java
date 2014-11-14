@@ -45,7 +45,7 @@ public class ApiRequester {
     }
 
     public JSONObject post(String target, HashMap properties) throws IOException {
-        PostMethod post = new PostMethod(baseUrl + "/" + target);
+        PostMethod post = new PostMethod(generateUrl(target));
         post.setDoAuthentication(true);
 
         if (properties != null) {
@@ -58,7 +58,6 @@ public class ApiRequester {
                 it.remove(); // avoids a ConcurrentModificationException
             }
         }
-
 
         lastStatusCode = client.executeMethod(post);
         JSONObject response = (JSONObject) JSONSerializer.toJSON(post.getResponseBodyAsString());
@@ -74,7 +73,6 @@ public class ApiRequester {
 
     public JSONObject get(String target, HashMap properties) throws IOException {
         String params = "";
-
 
         if (properties != null) {
             params += "?";
@@ -96,7 +94,7 @@ public class ApiRequester {
             }
         }
 
-        GetMethod get = new GetMethod(baseUrl + "/" + target + params);
+        GetMethod get = new GetMethod(generateUrl(target) + params);
         get.setDoAuthentication(true);
 
 
@@ -106,5 +104,16 @@ public class ApiRequester {
         get.releaseConnection();
 
         return response;
+    }
+
+    protected String generateUrl(String target) {
+        if (target.substring(0, 4).equals("http")) {
+            System.out.println("FOUND HTTP: " + target);
+            return target;
+        }
+
+        System.out.println("NO HTTP: " + baseUrl + "/" + target);
+
+        return baseUrl + "/" + target;
     }
 }
