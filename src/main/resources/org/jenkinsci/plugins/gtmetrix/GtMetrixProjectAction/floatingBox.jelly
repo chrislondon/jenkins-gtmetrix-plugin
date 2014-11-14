@@ -1,5 +1,5 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:p="/lib/hudson/project">
-    <j:set var="report" value="${from.report}"/>
+    <j:set var="report" value="${from.getReport()}"/>
 
     <div class="content">
         <h2>GT Metrix Summary</h2>
@@ -34,7 +34,7 @@
                         </div>
                     </div>
                     <div class="report-summary-details">
-                        <b>Page load time:</b> ${report.humanizeMilliseconds("12345")}<br />
+                        <b>Page load time:</b> ${report.getResourceFileName()}<br />
                         <b>Total page size:</b> 1.68MB<br />
                         <b>Total number of requests:</b> 38<br />
                     </div>
