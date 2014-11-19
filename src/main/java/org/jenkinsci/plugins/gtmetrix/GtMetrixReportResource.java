@@ -17,6 +17,7 @@ class GtMetrixReportResource extends AbstractGtMetrixJSONResource {
     }
 
     public String getPageLoadTime() {
+        System.out.println("HERE");
         System.out.println(resource.getJSONObject("results").getString("page_load_time"));
         return resource.getJSONObject("results").getString("page_load_time");
     }

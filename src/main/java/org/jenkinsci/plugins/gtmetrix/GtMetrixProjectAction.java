@@ -15,15 +15,20 @@ public class GtMetrixProjectAction implements Action {
         super();
         this.project = project;
     }
+
+    public AbstractProject getProject() {
+        return project;
+    }
+
     /**
      * Get the violations action for this project.
      * This is defined as the most recent violations actions
      * of the builds of this project.
      * @return the most recent violations build action.
      */
-    public GtMetrixBuildAction getGtMetrixAction() {
+    public GtMetrixBuildAction getLastResult() {
 
-        /*for (AbstractBuild<?, ?> b = getProject().getLastBuild();
+        for (AbstractBuild<?, ?> b = getProject().getLastBuild();
              b != null;
              b = b.getPreviousBuild()) {
 
@@ -32,13 +37,11 @@ public class GtMetrixProjectAction implements Action {
             if (ret != null && ret.getReport() != null) {
                 return ret;
             }
-        }*/
+        }
+
         return null;
     }
 
-    public GtMetrixReportResource getReport() {
-        return new GtMetrixReportResource(project.getLastBuild());
-    }
 
     /**
      * Returns the path to the JDepend page

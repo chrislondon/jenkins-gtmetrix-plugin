@@ -40,6 +40,8 @@ abstract class AbstractGtMetrixJSONResource {
 
         BufferedReader reader = new BufferedReader(new FileReader(build.getRootDir().getPath() + "/gtmetrix/" + getResourceFileName()));
 
+        System.out.println(build.getRootDir().getPath() + "/gtmetrix/" + getResourceFileName());
+
         String line = null;
         while ((line = reader.readLine()) != null) {
             jsonString += line;

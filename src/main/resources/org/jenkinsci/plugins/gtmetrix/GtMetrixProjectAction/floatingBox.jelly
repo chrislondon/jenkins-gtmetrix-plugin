@@ -1,47 +1,14 @@
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:p="/lib/hudson/project">
-    <j:set var="report" value="${from.getReport()}"/>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt" xmlns:local="local">
+    <j:set var="lastResult" value="${from.lastResult}"/>
 
     <div class="content">
         <h2>GT Metrix Summary</h2>
 
-        <j:if test="${report != null}">
-                <div class="report-pdf">
-                    <a href="ws/gtmetrix/report.pdf" class="pdf-modal-trigger" target="_blank">Download PDF</a>
-                    <a href="ws/gtmetrix/full_report.pdf" class="pdf-modal-trigger" target="_blank">Download Full PDF</a>
-                </div>
-
-                <div class="box report-summary clear">
-                    <div class="report-summary-pagespeed report-grade-F clear">
-                        <h3 class="report-grade">F</h3>
-                        <span class="report-title">Page Speed Grade:</span><br />
-                        <span class="report-score">(48%)</span>
-                        <div class="rule-average rule-average-below">79%</div>
-                        <div class="rule-average-tip tooltip">
-                            <a href="/faq.html#faq-relative-score" class="rule-help" title="What does this mean?">What does this mean?</a>
-                            <h4>Relative Score</h4>
-                            <p>The average Page Speed grade is <span>79%</span></p>
-                        </div>
-                    </div>
-                    <div class="report-summary-yslow report-grade-C clear">
-                        <h3 class="report-grade">C</h3>
-                        <span class="report-title">YSlow Grade:</span><br />
-                        <span class="report-score">(71%)</span>
-                        <div class="rule-average rule-average-below">79%</div>
-                        <div class="rule-average-tip tooltip">
-                            <a href="/faq.html#faq-relative-score" class="rule-help" title="What does this mean?">What does this mean?</a>
-                            <h4>Relative Score</h4>
-                            <p>The average YSlow grade is <span>79%</span></p>
-                        </div>
-                    </div>
-                    <div class="report-summary-details">
-                        <b>Page load time:</b> ${report.getResourceFileName()}<br />
-                        <b>Total page size:</b> 1.68MB<br />
-                        <b>Total number of requests:</b> 38<br />
-                    </div>
-                </div>
+        <j:if test="${lastResult != null}">
+            <h3>Page Load Time: ${lastResult.report.pageLoadTime}</h3>
         </j:if>
 
-        <j:if test="${report == null}">
+        <j:if test="${lastResult == null}">
             Unable to find report. ${report}
         </j:if>
 
