@@ -1,5 +1,6 @@
 package org.jenkinsci.plugins.gtmetrix;
 
+import hudson.model.AbstractBuild;
 import hudson.model.Build;
 import hudson.model.Action;
 import org.kohsuke.stapler.StaplerProxy;
@@ -8,10 +9,10 @@ import org.kohsuke.stapler.StaplerProxy;
  * Created by chrislondon on 11/11/14.
  */
 public class GtMetrixBuildAction implements Action {
-    public final Build<?, ?> build;
+    public final AbstractBuild<?, ?> build;
     public transient GtMetrixReportResource report = null;
 
-    private GtMetrixBuildAction(Build<?, ?> build)
+    public GtMetrixBuildAction(AbstractBuild<?, ?> build)
     {
         super();
         this.build = build;
@@ -38,6 +39,10 @@ public class GtMetrixBuildAction implements Action {
 
         System.out.println(report);
         return report;
+    }
+
+    public String getPageLoadTime(){
+        return getReport().getPageLoadTime();
     }
 
     /**
