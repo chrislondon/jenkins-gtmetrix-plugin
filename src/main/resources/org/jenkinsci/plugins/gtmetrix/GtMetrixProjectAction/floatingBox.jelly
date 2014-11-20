@@ -5,8 +5,7 @@
         <h2>GT Metrix Summary</h2>
 
         <j:if test="${lastResult != null}">
-            <h3>Page Load Time: ${lastResult.getPageLoadTime()}</h3>
-
+            <h3>Page Load Time: ${lastResult.report.pageLoadTime}</h3>
         </j:if>
 
         <j:if test="${lastResult == null}">

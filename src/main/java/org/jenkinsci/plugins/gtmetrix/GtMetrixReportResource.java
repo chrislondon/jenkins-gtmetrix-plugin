@@ -7,7 +7,7 @@ import net.sf.json.JSONObject;
 /**
  * Created by chrislondon on 11/12/14.
  */
-class GtMetrixReportResource extends AbstractGtMetrixJSONResource {
+public class GtMetrixReportResource extends AbstractGtMetrixJSONResource {
     public String getResourceFileName() {
         return "report.json";
     }
