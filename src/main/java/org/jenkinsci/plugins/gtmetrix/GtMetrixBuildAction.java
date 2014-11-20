@@ -22,10 +22,6 @@ public class GtMetrixBuildAction implements Action {
         return new GtMetrixBuildAction(build);
     }
 
-    public String findReport() {
-        return "HI!";
-    }
-
     public String getGtMetrixHtml() {
         return "<h1>WOOT!</h1>";
     }
@@ -36,8 +32,6 @@ public class GtMetrixBuildAction implements Action {
         }
 
         report = new GtMetrixReportResource(build);
-
-        System.out.println(report);
         return report;
     }
 

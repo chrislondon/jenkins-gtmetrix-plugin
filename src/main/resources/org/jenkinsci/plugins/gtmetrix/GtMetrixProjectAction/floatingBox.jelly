@@ -5,7 +5,30 @@
         <h2>GT Metrix Summary</h2>
 
         <j:if test="${lastResult != null}">
-            <h3>Page Load Time: ${lastResult.report.pageLoadTime}</h3>
+            <div class="report-pdf">
+                <a href="ws/gtmetrix/report.pdf" class="pdf-modal-trigger" target="_blank">Download PDF</a>
+                <a href="ws/gtmetrix/full_report.pdf" class="pdf-modal-trigger" target="_blank">Download Full PDF</a>
+            </div>
+
+            <div class="box report-summary clear">
+                <div class="report-summary-pagespeed report-grade-F clear">
+                    <h3 class="report-grade">${lastResult.getGrade(lastResult.pagespeedScore)}</h3>
+                    <span class="report-title">Page Speed Grade:</span><br />
+                    <span class="report-score">${lastResult.pagespeedScore}</span>
+                    <!--<div class="rule-average rule-average-below">79%</div>-->
+                </div>
+                <div class="report-summary-yslow report-grade-C clear">
+                    <h3 class="report-grade">${lastResult.getGrade(lastResult.yslowScore)}</h3>
+                    <span class="report-title">YSlow Grade:</span><br />
+                    <span class="report-score">${lastResult.yslowScore}</span>
+                    <!--<div class="rule-average rule-average-below">79%</div> -->
+                </div>
+                <div class="report-summary-details">
+                    <b>Page load time:</b> ${lastResult.getTime(lastResult.pageLoadTime)}<br />
+                    <b>Total page size:</b> ${lastResult.getSize(lastResult.pageBytes)}<br />
+                    <b>Total number of requests:</b> ${lastResult.pageElements}<br />
+                </div>
+            </div>
         </j:if>
 
         <j:if test="${lastResult == null}">
