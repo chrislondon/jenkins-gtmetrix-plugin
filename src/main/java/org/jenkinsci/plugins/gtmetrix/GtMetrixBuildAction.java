@@ -41,10 +41,6 @@ public class GtMetrixBuildAction implements Action {
         return report;
     }
 
-    public String getPageLoadTime(){
-        return getReport().getPageLoadTime();
-    }
-
     /**
      * Returns the path to the JDepend page
      * @see hudson.model.Action#getUrlName()
