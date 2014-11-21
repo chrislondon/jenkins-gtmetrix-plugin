@@ -1,0 +1,42 @@
+.gt-content {
+    width: 600px;
+}
+
+.gt-clear {
+    clear: both;
+}
+
+.gt-summary-overall,
+.gt-summary-pagespeed,
+.gt-summary-yslow {
+    float:left;
+    width: 33%;
+}
+
+.gt .report-grade {
+    float: right;
+    padding: 0;
+    margin: 0 50px 0 0;
+    font-size: 24px;
+    line-height: 1.1;
+}
+
+.gt .report-grade-F {
+    color: #CC0000;
+}
+
+.gt .report-grade-D {
+    color: #CC6600;
+}
+
+.gt .report-grade-C {
+    color: #CCCC00;
+}
+
+.gt .report-grade-B {
+   color: #66CC00;
+}
+
+.gt .report-grade-A {
+    color: #00CC00;
+}

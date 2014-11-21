@@ -1,0 +1,37 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt" xmlns:local="local">
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="${rootURL}/plugin/gtmetrix/css/gtmetrix.css" type="text/css" />
+
+    <div class="gt gt-content">
+        <h2>GT Metrix Summary <a href="artifact/gtmetrix/full_report.pdf" class="pdf-modal-trigger" target="_blank"><i class="fa fa-file-pdf-o"></i></a></h2>
+
+        <j:if test="${from.report != null}">
+            <div class="gt-clear">
+                <div class="gt-summary-overall report-grade-${from.report.getGrade(from.report.overallScore)}">
+                    <h3 class="report-grade">${from.report.getGrade(from.report.overallScore)}</h3>
+                    <span class="report-title">Overall Grade:</span><br />
+                    <span class="report-score">${from.report.overallScore}</span>
+                </div>
+                <div class="gt-summary-pagespeed report-grade-${from.report.getGrade(from.report.pagespeedScore)}">
+                    <h3 class="report-grade">${from.report.getGrade(from.report.pagespeedScore)}</h3>
+                    <span class="report-title">Page Speed Grade:</span><br />
+                    <span class="report-score">${from.report.pagespeedScore}</span>
+                </div>
+                <div class="gt-summary-yslow report-grade-${from.report.getGrade(from.report.yslowScore)}">
+                    <h3 class="report-grade">${from.report.getGrade(from.report.yslowScore)}</h3>
+                    <span class="report-title">YSlow Grade:</span><br />
+                    <span class="report-score">${from.report.yslowScore}</span>
+                </div>
+            </div>
+
+            <div class="gt-clear">
+                <a href="${rootURL}/${from.build.url}gtmetrix">View Details</a>
+            </div>
+        </j:if>
+
+        <j:if test="${from == null}">
+            Unable to find report. ${report}
+        </j:if>
+
+    </div>
+</j:jelly>

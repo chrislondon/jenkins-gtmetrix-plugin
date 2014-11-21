@@ -15,7 +15,7 @@ import java.math.RoundingMode;
 /**
  * Created by chrislondon on 11/12/14.
  */
-abstract class AbstractGtMetrixJSONResource {
+public abstract class AbstractGtMetrixJSONResource {
     protected JSONObject resource = null;
     protected JSONObject previousResource = null;
 
@@ -54,18 +54,55 @@ abstract class AbstractGtMetrixJSONResource {
         return resource != null;
     }
 
-    public String humanizeMilliseconds(String msString) {
-        double ms = Double.parseDouble(msString);
+    public String getSize(String sizeString) {
+        boolean si = true;
+        long bytes = Long.parseLong(sizeString);
+        int unit = si ? 1000 : 1024;
+        if (bytes < unit) return bytes + " B";
+        int exp = (int) (Math.log(bytes) / Math.log(unit));
+        String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp-1) + (si ? "" : "i");
+        return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
 
-        if (ms < 1000) {
-            return ms + "ms";
+    }
+
+    public String getTime(String milliseconds) {
+        return getTime(Double.parseDouble(milliseconds));
+    }
+
+    public String getTime(int milliseconds) {
+        return getTime((double) milliseconds);
+    }
+
+    public String getTime(double ms) {
+        if (ms < 1000.0) {
+            return ms + " ms";
         }
 
-        if (ms < 60000) {
-            return round(ms / 1000, 2) + "s";
+        return (ms / 1000.0) + " s";
+    }
+
+    public String getGrade(String scoreString) {
+        return getGrade(Integer.parseInt(scoreString));
+    }
+
+    public String getGrade(int score) {
+        if (score < 60) {
+            return "F";
         }
 
-        return round(ms / 60000, 2) + "m";
+        if (score < 70) {
+            return "D";
+        }
+
+        if (score < 80) {
+            return "C";
+        }
+
+        if (score < 90) {
+            return "B";
+        }
+
+        return "A";
     }
 
     public static double round(double value, int places) {
@@ -74,5 +111,21 @@ abstract class AbstractGtMetrixJSONResource {
         BigDecimal bd = new BigDecimal(value);
         bd = bd.setScale(places, RoundingMode.HALF_UP);
         return bd.doubleValue();
+    }
+
+    public String getStatus(int score) {
+        if (score < 70) {
+            return "Failure";
+        }
+
+        if (score < 80) {
+            return "Warning";
+        }
+
+        return "Success";
+    }
+
+    public String getStatus(String score) {
+        return getStatus(Integer.parseInt(score));
     }
 }

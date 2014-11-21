@@ -128,6 +128,11 @@ public class GtMetrixBuilder extends Builder {
 
             listener.getLogger().println("Downloading workspace files");
             downloader.download(filesToDownload, build.getWorkspace());
+
+            filesToDownload.put("gtmetrix/report.pdf", "gtmetrix/report.pdf");
+            filesToDownload.put("gtmetrix/full_report.pdf", "gtmetrix/full_report.pdf");
+            filesToDownload.put("gtmetrix/screenshot.png", "gtmetrix/screenshot.png");
+
             listener.getLogger().println("Archiving workspace files");
             downloader.archive(filesToDownload);
 
@@ -137,7 +142,7 @@ public class GtMetrixBuilder extends Builder {
             filesToDownload.put(pollStateUrl, "report.json");
             filesToDownload.put(response.getJSONObject("resources").getString("pagespeed"), "pagespeed.json");
             filesToDownload.put(response.getJSONObject("resources").getString("har"), "har.json");
-            filesToDownload.put(response.getJSONObject("resources").getString("pagespeed_files"), "pagespeed_files.json");
+            filesToDownload.put(response.getJSONObject("resources").getString("pagespeed_files"), "pagespeed_files.tar");
             filesToDownload.put(response.getJSONObject("resources").getString("yslow"), "yslow.json");
 
             listener.getLogger().println("Downloading build files");

@@ -48,46 +48,74 @@ public class GtMetrixReportResource extends AbstractGtMetrixJSONResource {
         return resource.getJSONObject("results").getString("page_bytes");
     }
 
-    public String getSize(String sizeString) {
-        boolean si = true;
-        long bytes = Long.parseLong(sizeString);
-        int unit = si ? 1000 : 1024;
-        if (bytes < unit) return bytes + " B";
-        int exp = (int) (Math.log(bytes) / Math.log(unit));
-        String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp-1) + (si ? "" : "i");
-        return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
+    /**
+     * 100% < 1s
+     * 0% >= 6s
+     *
+     * @return
+     */
+    public int getTimeScore() {
+        int time = Integer.parseInt(getPageLoadTime());
 
+        if (time < 1000) {
+            return 100;
+        } else if (time >= 6000) {
+            return 0;
+        }
+
+        return (int) Math.round((-1.0/50.0) * time + 120.0);
     }
 
-    public String getTime(String milliseconds) {
-        double ms = Double.parseDouble(milliseconds);
+    /**
+     * 100% < 100kb
+     * 50% = 1mb
+     *
+     * @return
+     */
+    public int getSizeScore() {
+        int size = Integer.parseInt(getPageBytes());
 
-        if (ms < 1000.0) {
-            return ms + " ms";
+        if (size < 100000) {
+            return 100;
+        } else if (size >= 1000000) {
+            return 50;
         }
 
-        return (ms / 1000.0) + " s";
+        return (int) Math.round((-1.0/18000.0) * size + 105.55556);
     }
 
-    public String getGrade(String scoreString) {
-        int score = Integer.parseInt(scoreString);
+    /**
+     * 100% < 5
+     * 0% >= 55
+     *
+     * @return
+     */
+    public int getRequestsScore() {
+        int requests = Integer.parseInt(getPageElements());
 
-        if (score < 60) {
-            return "F";
+        if (requests < 5) {
+            return 100;
+        } else if (requests >= 55) {
+            return 0;
         }
 
-        if (score < 70) {
-            return "D";
+        return (int) Math.round(-2.0 * requests + 110.0);
+    }
+
+    public int getOverallScore() {
+        int timeScore = getTimeScore();
+        int sizeScore = getSizeScore();
+        int requestsScore = getRequestsScore();
+
+
+        if (timeScore < sizeScore && timeScore < requestsScore) {
+            return timeScore;
         }
 
-        if (score < 80) {
-            return "C";
+        if (sizeScore < timeScore && sizeScore < requestsScore) {
+            return sizeScore;
         }
 
-        if (score < 90) {
-            return "B";
-        }
-
-        return "A";
+        return requestsScore;
     }
 }

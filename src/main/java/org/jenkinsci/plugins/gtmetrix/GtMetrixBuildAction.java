@@ -10,7 +10,10 @@ import org.kohsuke.stapler.StaplerProxy;
  */
 public class GtMetrixBuildAction implements Action {
     public final AbstractBuild<?, ?> build;
-    public transient GtMetrixReportResource report = null;
+    public GtMetrixReportResource report = null;
+    public GtMetrixHarResource har = null;
+    public GtMetrixPagespeedResource pagespeed = null;
+    public GtMetrixYslowResource yslow = null;
 
     public GtMetrixBuildAction(AbstractBuild<?, ?> build)
     {
@@ -22,17 +25,40 @@ public class GtMetrixBuildAction implements Action {
         return new GtMetrixBuildAction(build);
     }
 
-    public String getGtMetrixHtml() {
-        return "<h1>WOOT!</h1>";
-    }
-
-    public synchronized GtMetrixReportResource getReport() {
+    public GtMetrixReportResource getReport() {
         if (report != null) {
             return report;
         }
 
         report = new GtMetrixReportResource(build);
         return report;
+    }
+
+    public GtMetrixHarResource getHar() {
+        if (har != null) {
+            return har;
+        }
+
+        har = new GtMetrixHarResource(build);
+        return har;
+    }
+
+    public GtMetrixPagespeedResource getPagespeed() {
+        if (pagespeed != null) {
+            return pagespeed;
+        }
+
+        pagespeed = new GtMetrixPagespeedResource(build);
+        return pagespeed;
+    }
+
+    public GtMetrixYslowResource getYslow() {
+        if (yslow != null) {
+            return yslow;
+        }
+
+        yslow = new GtMetrixYslowResource(build);
+        return yslow;
     }
 
     /**

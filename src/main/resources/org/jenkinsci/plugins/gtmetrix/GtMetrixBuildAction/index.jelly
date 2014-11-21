@@ -1,35 +1,258 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt" xmlns:local="local">
 
     <l:layout>
-        <l:header>
-            <style type="text/css" media="all">
-                table.bodyTable
-                {
-                    border-collapse: collapse;
-                    border: 1px #bbb solid;
-                    width:auto;
-                    margin: 0px;
-                }
-
-                .bodyTable td
-                {
-                    border: 1px #bbb solid;
-                    width: auto;
-                }
-
-                th
-                {
-                    border: 1px #bbb solid;
-                    background-color: #f0f0f0;
-                    font-weight: bold;
-                }
-            </style>
-        </l:header>
         <st:include it="${it.build}" page="sidepanel.jelly" />
 
         <l:main-panel>
-            <img src="${it.build.getRootDir().toURI().getPath()}gtmetrix/screenshot.png" />
-            ${it.getGtMetrixHtml()}
+            <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" />
+                <link rel="stylesheet" href="${rootURL}/plugin/gtmetrix/css/gtmetrix.css" type="text/css" />
+                <script type="text/javascript" src="https://www.google.com/jsapi?autoload={'modules':[{'name':'visualization', 'version':'1','packages':['timeline','table']}]}"></script>
+                <script type="text/javascript">
+
+                    // Load the Visualization API and the piechart package.
+                    google.load('visualization', '1.0', {'packages':['corechart']});
+
+                    // Set a callback to run when the Google Visualization API is loaded.
+                    google.setOnLoadCallback(drawChart);
+
+                    // Callback that creates and populates a data table,
+                    // instantiates the pie chart, passes in the data and
+                    // draws it.
+                    function drawChart() {
+                        /**
+                         * PAGESPEED HISTORY
+                         */
+
+                        var data = google.visualization.arrayToDataTable([
+                            ['Month', 'Bolivia', 'Ecuador', 'Madagascar', 'Papua New Guinea', 'Rwanda', 'Average'],
+                            ['2004/05',  165,      938,         522,             998,           450,      614.6],
+                            ['2005/06',  135,      1120,        599,             1268,          288,      682],
+                            ['2006/07',  157,      1167,        587,             807,           397,      623],
+                            ['2007/08',  139,      1110,        615,             968,           215,      609.4],
+                            ['2008/09',  136,      691,         629,             1026,          366,      569.6]
+                          ]);
+
+                          var options = {
+                            title : 'Monthly Coffee Production by Country',
+                            vAxis: {title: "Cups"},
+                            hAxis: {title: "Month"},
+                            seriesType: "area",
+                            isStacked: true,
+                            series: {5: {type: "line"}}
+                          };
+
+                          var chart = new google.visualization.ComboChart(document.getElementById('pagespeed_history'));
+                          chart.draw(data, options);
+
+
+                        /**
+                         *  WATERFALL CHART
+                         */
+
+                        var container = document.getElementById('waterfall_chart');
+                        var chart = new google.visualization.Timeline(container);
+
+                        var dataTable = new google.visualization.DataTable();
+                        dataTable.addColumn({ type: 'string', id: 'Position' });
+                        dataTable.addColumn({ type: 'string', id: 'Name' });
+                        dataTable.addColumn({ type: 'date', id: 'Start' });
+                        dataTable.addColumn({ type: 'date', id: 'End' });
+
+                        var rows = [];
+
+                        var url = "";
+                        var milliseconds = 0;
+                        var vals = {};
+
+                        var originalMilliseconds = 0;
+
+                        <j:forEach var="e" items="${it.har.entries}">
+                            url = '${e.getJSONObject("request").getString("url")}';
+                            milliseconds = (new Date('${e.getString("startedDateTime")}')).getTime();
+
+                            if (originalMilliseconds === 0) {
+                                originalMilliseconds = milliseconds;
+                            }
+
+                            milliseconds -= originalMilliseconds;
+
+                            vals = {
+                                'Blocking':   ${e.getJSONObject("timings").getInt("blocked")},
+                                'DNS Lookup': ${e.getJSONObject("timings").getInt("dns")},
+                                'Connecting': ${e.getJSONObject("timings").getInt("connect")},
+                                'Sending':    ${e.getJSONObject("timings").getInt("send")},
+                                'Waiting':    ${e.getJSONObject("timings").getInt("wait")},
+                                'Receiving':  ${e.getJSONObject("timings").getInt("receive")}
+                            }
+
+                            for (var i in vals) {
+                                if (vals[i] > 0) {
+                                    rows.push([ '${e.getJSONObject("request").getString("url")}', i, new Date(milliseconds), new Date(milliseconds + vals[i])]);
+                                    milliseconds += vals[i];
+                                }
+                            }
+                        </j:forEach>
+
+                        dataTable.addRows(rows);
+
+                        chart.draw(dataTable, {
+                            timeline: {
+                                showBarLabels: false
+                            }
+                        });
+
+                        /**
+                         * REQUEST TABLE
+                         */
+
+                        var data = new google.visualization.DataTable();
+                        data.addColumn('string', 'Url');
+                        data.addColumn('string', 'File Type');
+                        data.addColumn('string', 'Method');
+                        data.addColumn('number', 'Status');
+                        data.addColumn('number', 'Size');
+                        data.addColumn('number', 'Time');
+                        data.addRows([
+                            <j:forEach var="e" items="${it.har.entries}">
+                                [
+                                    '${e.getJSONObject("request").getString("url")}',
+                                    '${e.getJSONObject("response").getJSONObject("content").getString("mimeType")}',
+                                    '${e.getJSONObject("request").getString("method")}',
+                                    ${e.getJSONObject("response").getString("status")},
+                                    {v: ${e.getJSONObject("response").getString("bodySize")}, f: '${it.report.getSize(e.getJSONObject("response").getString("bodySize"))}'},
+                                    {v: ${e.getInt("time")}, f: '${it.report.getTime(e.getInt("time"))}'}
+                                ],
+                            </j:forEach>
+                        ]);
+
+                        var table = new google.visualization.Table(document.getElementById('request_table'));
+
+                        table.draw(data, {showRowNumber: true});
+
+
+
+                        /**
+                         * PAGESPEED RECOMMENDATIONS TABLE
+                         */
+
+                        var data = new google.visualization.DataTable();
+                        data.addColumn('string', 'Rule');
+                        data.addColumn('number', 'Score');
+                        data.addColumn('number', 'Type');
+                        data.addRows([
+                            <j:forEach var="e" items="${it.pagespeed.rules}">
+                                [
+                                    '${e.getString("name")}',
+                                    {v: ${e.getInt("score")}, f: '${e.getInt("score")} ${it.report.getGrade(e.getInt("score"))}'},
+                                    {v: ${e.getInt("score")}, f: '${it.report.getStatus(e.getInt("score"))}'}
+                                ],
+                            </j:forEach>
+                        ]);
+
+                        var table = new google.visualization.Table(document.getElementById('pagespeed_recommendation_table'));
+
+                        table.draw(data, {showRowNumber: true, sortColumn: 2});
+
+
+                        /**
+                         * YSLOW RECOMMENDATIONS TABLE
+                         */
+
+                        var data = new google.visualization.DataTable();
+                        data.addColumn('string', 'Rule');
+                        data.addColumn('number', 'Score');
+                        data.addColumn('number', 'Type');
+                        data.addRows([
+                            <j:forEach var="e" items="${it.yslow.getRules()}">
+                                [
+                                    '${e.getString("name")}',
+                                    {v: ${e.getInt("score")}, f: '${e.getInt("score")} ${it.report.getGrade(e.getInt("score"))}'},
+                                    {v: ${e.getInt("score")}, f: '${it.report.getStatus(e.getInt("score"))}'}
+                                ],
+                            </j:forEach>
+                        ]);
+
+                        var table = new google.visualization.Table(document.getElementById('yslow_recommendation_table'));
+
+                        table.draw(data, {showRowNumber: true, sortColumn: 2});
+                    }
+                </script>
+                
+                <div class="gt gt-full-content">
+                    <h1>GT Metrix <a href="ws/gtmetrix/full_report.pdf" class="pdf-modal-trigger" target="_blank"><i class="fa fa-file-pdf-o"></i></a></h1>
+
+                    <div>
+                        <h2>Page Speed Information</h2>
+
+                        <h3>Overview</h3>
+
+                        <strong>Score</strong> ${it.report.pagespeedScore}<br />
+                        <strong>Failure Count</strong> ${it.pagespeed.failureCount}<br />
+                        <strong>Warning Count</strong> ${it.pagespeed.warningCount}<br />
+
+                        <h3>Score History</h3>
+                        <div id="pagespeed_history"></div>
+
+                        <h3>Recommendations</h3>
+
+                        <div id="pagespeed_recommendation_table" style="height: ${it.pagespeed.rules.size() * 19 + 27}px; width: 100%"></div>
+
+                    </div>
+
+                    <div>
+                        <h2>YSlow Information</h2>
+
+                        <h3>Overview</h3>
+
+                        <strong>Score</strong> ${it.report.yslowScore}<br />
+                        <strong>Failure Count</strong> ${it.yslow.failureCount}<br />
+                        <strong>Warning Count</strong> ${it.yslow.warningCount}<br />
+
+                        <h3>Score History</h3>
+                        <div id="yslow_history"></div>
+
+                        <h3>Recommendations</h3>
+
+                        <div id="yslow_recommendation_table" style="height: ${it.yslow.rules.size() * 19 + 27}px; width: 100%"></div>
+
+                    </div>
+
+                    <div>
+                        <h2>Request Information</h2>
+
+                        <h3>Overview</h3>
+
+                        <div class="gt-clear">
+                            <div class="gt-summary-overall report-grade-${it.report.getGrade(it.report.timeScore)}">
+                                <h3 class="report-grade">${it.report.getGrade(it.report.timeScore)}</h3>
+                                <span class="report-title">Page Load Time:</span><br />
+                                <span class="report-score">${it.report.getTime(it.report.pageLoadTime)}</span>
+                            </div>
+                            <div class="gt-summary-overall report-grade-${it.report.getGrade(it.report.sizeScore)}">
+                                <h3 class="report-grade">${it.report.getGrade(it.report.sizeScore)}</h3>
+                                <span class="report-title">Page Size:</span><br />
+                                <span class="report-score">${it.report.getSize(it.report.pageBytes)}</span>
+                            </div>
+                            <div class="gt-summary-overall report-grade-${it.report.getGrade(it.report.requestsScore)}">
+                                <h3 class="report-grade">${it.report.getGrade(it.report.requestsScore)}</h3>
+                                <span class="report-title">Number of Requests:</span><br />
+                                <span class="report-score">${it.report.pageElements}</span>
+                            </div>
+                        </div>
+
+                        <h3>Overview History</h3>
+                        <div id="overview_history"></div>
+
+                        <h3>Waterfall</h3>
+
+                        <div id="waterfall_chart" style="height: ${it.har.entries.size() * 40 + 100}px"></div>
+
+                        <h3>Request Information</h3>
+
+                        <div id="request_table" style="height: ${it.har.entries.size() * 20 + 50}px; width: 100%"></div>
+
+                    </div>
+                </div>
         </l:main-panel>
     </l:layout>
 </j:jelly>
