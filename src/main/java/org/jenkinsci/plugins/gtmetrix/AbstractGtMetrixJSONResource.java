@@ -6,9 +6,7 @@ import net.sf.json.JSON;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
@@ -17,30 +15,38 @@ import java.math.RoundingMode;
  */
 public abstract class AbstractGtMetrixJSONResource {
     protected JSONObject resource = null;
-    protected JSONObject previousResource = null;
+    protected AbstractBuild build;
 
     public abstract String getResourceFileName();
 
     protected AbstractGtMetrixJSONResource(AbstractBuild build) {
+        this.build = build;
+
         try {
             resource = loadFile(build);
         } catch (Exception e) {
             System.out.println(e);
         }
+    }
 
-        try {
-            previousResource = loadFile(build.getPreviousBuild());
-        } catch (Exception e) {
-            System.out.println(e);
-        }
+    public JSONObject getResource() {
+        return resource;
+    }
+
+    public String getFullPath() {
+        return build.getRootDir().getPath() + "/gtmetrix/" + getResourceFileName();
     }
 
     public JSONObject loadFile(AbstractBuild build) throws IOException, InterruptedException {
         String jsonString = "";
 
-        BufferedReader reader = new BufferedReader(new FileReader(build.getRootDir().getPath() + "/gtmetrix/" + getResourceFileName()));
+        File file = new File(getFullPath());
 
-        System.out.println(build.getRootDir().getPath() + "/gtmetrix/" + getResourceFileName());
+        if (!file.exists() || file.isDirectory()) {
+            return null;
+        }
+
+        BufferedReader reader = new BufferedReader(new FileReader(file));
 
         String line = null;
         while ((line = reader.readLine()) != null) {
@@ -48,6 +54,19 @@ public abstract class AbstractGtMetrixJSONResource {
         }
 
         return (JSONObject) JSONSerializer.toJSON(jsonString);
+    }
+
+    public boolean save() {
+        try {
+            PrintWriter writer = new PrintWriter(getFullPath(), "UTF-8");
+            resource.write(writer);
+            writer.close();
+        } catch (Exception e) {
+            System.out.println(e);
+            return false;
+        }
+
+        return true;
     }
 
     public boolean isValid() {

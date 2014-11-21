@@ -24,26 +24,85 @@
                          */
 
                         var data = google.visualization.arrayToDataTable([
-                            ['Month', 'Bolivia', 'Ecuador', 'Madagascar', 'Papua New Guinea', 'Rwanda', 'Average'],
-                            ['2004/05',  165,      938,         522,             998,           450,      614.6],
-                            ['2005/06',  135,      1120,        599,             1268,          288,      682],
-                            ['2006/07',  157,      1167,        587,             807,           397,      623],
-                            ['2007/08',  139,      1110,        615,             968,           215,      609.4],
-                            ['2008/09',  136,      691,         629,             1026,          366,      569.6]
+                            ['Build',   'Warnings', 'Failures', 'Score'],
+                            <j:forEach var="e" items="${it.history.pagespeed}">
+                                ['${e.getString("build")}', ${e.getString("warnings")}, ${e.getString("failures")}, ${e.getString("score")}],
+                            </j:forEach>
                           ]);
 
                           var options = {
-                            title : 'Monthly Coffee Production by Country',
-                            vAxis: {title: "Cups"},
-                            hAxis: {title: "Month"},
+                            hAxis: {title: "Builds"},
                             seriesType: "area",
                             isStacked: true,
-                            series: {5: {type: "line"}}
+                            series: {2: {type: "line", targetAxisIndex: 1}}
                           };
 
                           var chart = new google.visualization.ComboChart(document.getElementById('pagespeed_history'));
                           chart.draw(data, options);
 
+                        /**
+                         * YSLOW HISTORY
+                         */
+
+                        var data = google.visualization.arrayToDataTable([
+                            ['Build',   'Warnings', 'Failures', 'Score'],
+                            <j:forEach var="e" items="${it.history.yslow}">
+                                ['${e.getString("build")}', ${e.getString("warnings")}, ${e.getString("failures")}, ${e.getString("score")}],
+                            </j:forEach>
+                          ]);
+
+                          var options = {
+                            hAxis: {title: "Builds"},
+                            seriesType: "area",
+                            isStacked: true,
+                            series: {2: {type: "line", targetAxisIndex: 1}}
+                          };
+
+                          var chart = new google.visualization.ComboChart(document.getElementById('yslow_history'));
+                          chart.draw(data, options);
+
+
+                        /**
+                         * REQUEST HISTORY
+                         */
+
+                        var data = google.visualization.arrayToDataTable([
+                            ['Build',   'Size', 'Requests'],
+                            <j:forEach var="e" items="${it.history.request}">
+                                ['${e.getString("build")}', {v: ${e.getString("size")}, f: '${it.report.getSize(e.getString("size"))}'}, ${e.getString("requests")}],
+                            </j:forEach>
+                          ]);
+
+                          var options = {
+                            hAxis: {title: "Builds"},
+                            seriesType: "line",
+                            isStacked: true,
+                            series: {1: {targetAxisIndex: 1}}
+                          };
+
+                          var chart = new google.visualization.ComboChart(document.getElementById('request_history'));
+                          chart.draw(data, options);
+
+                        /**
+                         * LOAD TIME
+                         */
+
+                        var data = google.visualization.arrayToDataTable([
+                            ['Build',   'Load Time'],
+                            <j:forEach var="e" items="${it.history.request}">
+                                ['${e.getString("build")}', {v: ${e.getString("load")}, f: '${it.report.getTime(e.getString("load"))}'}],
+                            </j:forEach>
+                          ]);
+
+                          var options = {
+                            hAxis: {title: "Builds"},
+                            seriesType: "line",
+                            isStacked: true,
+                            series: {1: {targetAxisIndex: 1}}
+                          };
+
+                          var chart = new google.visualization.ComboChart(document.getElementById('loadtime_history'));
+                          chart.draw(data, options);
 
                         /**
                          *  WATERFALL CHART
@@ -179,7 +238,7 @@
                 </script>
                 
                 <div class="gt gt-full-content">
-                    <h1>GT Metrix <a href="ws/gtmetrix/full_report.pdf" class="pdf-modal-trigger" target="_blank"><i class="fa fa-file-pdf-o"></i></a></h1>
+                    <h1>GT Metrix <a href="../artifact/gtmetrix/full_report.pdf" class="pdf-modal-trigger" target="_blank"><i class="fa fa-file-pdf-o"></i></a></h1>
 
                     <div>
                         <h2>Page Speed Information</h2>
@@ -240,8 +299,11 @@
                             </div>
                         </div>
 
-                        <h3>Overview History</h3>
-                        <div id="overview_history"></div>
+                        <h3>Load Time History</h3>
+                        <div id="loadtime_history"></div>
+
+                        <h3>Request History</h3>
+                        <div id="request_history"></div>
 
                         <h3>Waterfall</h3>
 

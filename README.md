@@ -42,6 +42,7 @@ Run development Jenkins server with plugin.
 Future Plans / TODOs
 ====================
 
+- Track and display last change on summary page
 - Optimize
 - Implement Jenkins/Hudson best practices
 - Allow user to select test locations and browsers

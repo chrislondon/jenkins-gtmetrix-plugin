@@ -14,6 +14,7 @@ public class GtMetrixBuildAction implements Action {
     public GtMetrixHarResource har = null;
     public GtMetrixPagespeedResource pagespeed = null;
     public GtMetrixYslowResource yslow = null;
+    public GtMetrixHistoryResource history = null;
 
     public GtMetrixBuildAction(AbstractBuild<?, ?> build)
     {
@@ -41,6 +42,15 @@ public class GtMetrixBuildAction implements Action {
 
         har = new GtMetrixHarResource(build);
         return har;
+    }
+
+    public GtMetrixHistoryResource getHistory() {
+        if (history != null) {
+            return history;
+        }
+
+        history = new GtMetrixHistoryResource(build);
+        return history;
     }
 
     public GtMetrixPagespeedResource getPagespeed() {

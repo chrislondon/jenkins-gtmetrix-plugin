@@ -3,7 +3,7 @@
     <link rel="stylesheet" href="${rootURL}/plugin/gtmetrix/css/gtmetrix.css" type="text/css" />
 
     <div class="gt gt-content">
-        <h2>GT Metrix Summary <a href="artifact/gtmetrix/full_report.pdf" class="pdf-modal-trigger" target="_blank"><i class="fa fa-file-pdf-o"></i></a></h2>
+        <h2>GT Metrix Summary <a href="${rootURL}/${from.build.url}artifact/gtmetrix/full_report.pdf" class="pdf-modal-trigger" target="_blank"><i class="fa fa-file-pdf-o"></i></a></h2>
 
         <j:if test="${from.report != null}">
             <div class="gt-clear">

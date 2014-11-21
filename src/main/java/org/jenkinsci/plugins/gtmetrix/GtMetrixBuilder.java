@@ -3,15 +3,13 @@ package org.jenkinsci.plugins.gtmetrix;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.Action;
-import hudson.model.BuildListener;
+import hudson.model.*;
 import hudson.remoting.Base64;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
 import net.sf.json.JSONObject;
+import net.sf.json.JSONSerializer;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
@@ -120,7 +118,7 @@ public class GtMetrixBuilder extends Builder {
 
             HashMap filesToDownload = new HashMap();
 
-            // FILES WE WANT IN OUR WORKSPACE AND OUR ARCHIVE
+            // FILES WE WANT IN OUR WORKSPACE
             // These are files that the user can view from the jenkins web app
             filesToDownload.put(response.getJSONObject("resources").getString("report_pdf"), "report.pdf");
             filesToDownload.put(response.getJSONObject("resources").getString("report_pdf_full"), "full_report.pdf");
@@ -129,6 +127,7 @@ public class GtMetrixBuilder extends Builder {
             listener.getLogger().println("Downloading workspace files");
             downloader.download(filesToDownload, build.getWorkspace());
 
+            // FILES WE WANT ARCHIVED
             filesToDownload.put("gtmetrix/report.pdf", "gtmetrix/report.pdf");
             filesToDownload.put("gtmetrix/full_report.pdf", "gtmetrix/full_report.pdf");
             filesToDownload.put("gtmetrix/screenshot.png", "gtmetrix/screenshot.png");
@@ -148,6 +147,10 @@ public class GtMetrixBuilder extends Builder {
             listener.getLogger().println("Downloading build files");
             downloader.download(filesToDownload, new FilePath(build.getRootDir()));
 
+            // Compile history of reports
+            GtMetrixHistoryResource history = new GtMetrixHistoryResource(build);
+            history.generate();
+            history.save();
         } catch (Exception e) {
             listener.getLogger().println(e);
             return false;

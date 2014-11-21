@@ -20,6 +20,10 @@ public class GtMetrixPagespeedResource extends AbstractGtMetrixJSONResource {
         return resource.getJSONArray("rules");
     }
 
+    public int getScore() {
+        return resource.getJSONObject("pageStats").getInt("overallScore");
+    }
+
     public int getFailureCount() {
         int failures = 0;
 

@@ -47,6 +47,10 @@ public class GtMetrixYslowResource extends AbstractGtMetrixJSONResource {
         return response;
     }
 
+    public int getScore() {
+        return resource.getInt("o");
+    }
+
     protected JSONObject generateRule(String key, String name) {
         JSONObject response = new JSONObject();
         JSONObject element = resource.getJSONObject("g").getJSONObject(key);
